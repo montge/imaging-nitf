@@ -79,24 +79,34 @@ public class TreParser {
     // We seem unlikely to hit this: 10^9 - 2
     private static final int MAX_DES_DATA_LEN = 999999998;
 
-    private static Tres tresStructure = null;
+    private static volatile Tres tresStructure = null;
+    private static volatile java.util.Map<String, TreType> treTypeCache = null;
+    private static final Object INIT_LOCK = new Object();
 
     /**
         Constructor for TRE parser.
         <p>
         This does reasonably complex initialisation, so try to re-use it if possible.
+        The TRE specification is loaded from XML once and cached statically for all instances.
+        Thread-safe initialization using double-checked locking.
 
         @throws NitfFormatException if the initialisation fails.
     */
     public TreParser() throws NitfFormatException {
-        try (InputStream is = getClass().getResourceAsStream("/nitf_spec.xml")) {
-            unmarshal(is);
-        } catch (JAXBException ex) {
-            LOG.warn("JAXBException parsing TRE XML specification", ex);
-            throw new NitfFormatException(TRE_XML_LOAD_ERROR_MESSAGE + ex.getMessage());
-        } catch (IOException ex) {
-            LOG.warn("IOException parsing TRE XML specification", ex);
-            throw new NitfFormatException(TRE_XML_LOAD_ERROR_MESSAGE + ex.getMessage());
+        if (tresStructure == null) {
+            synchronized (INIT_LOCK) {
+                if (tresStructure == null) {
+                    try (InputStream is = getClass().getResourceAsStream("/nitf_spec.xml")) {
+                        unmarshal(is);
+                    } catch (JAXBException ex) {
+                        LOG.warn("JAXBException parsing TRE XML specification", ex);
+                        throw new NitfFormatException(TRE_XML_LOAD_ERROR_MESSAGE + ex.getMessage());
+                    } catch (IOException ex) {
+                        LOG.warn("IOException parsing TRE XML specification", ex);
+                        throw new NitfFormatException(TRE_XML_LOAD_ERROR_MESSAGE + ex.getMessage());
+                    }
+                }
+            }
         }
     }
 
@@ -123,6 +133,15 @@ public class TreParser {
             throw new JAXBException(e);
         }
         tresStructure = (Tres) getUnmarshaller().unmarshal(document);
+        buildTreTypeCache();
+    }
+
+    private void buildTreTypeCache() {
+        java.util.Map<String, TreType> cache = new java.util.HashMap<>();
+        for (TreType treType : tresStructure.getTre()) {
+            cache.put(treType.getName(), treType);
+        }
+        treTypeCache = cache;
     }
 
     private Unmarshaller getUnmarshaller() throws JAXBException {
@@ -167,10 +186,21 @@ public class TreParser {
                 tre.setEntries(group.getEntries());
             }
 
-        } catch (Exception e) {
+        } catch (NitfFormatException e) {
+            // Parsing failed due to format issues - fall back to raw data
             tre.setRawData(treBytes);
-            LOG.warn("Failed to parse TRE {}. See debug log for exception information.", tag);
-            LOG.debug(e.getMessage(), e);
+            LOG.warn("Failed to parse TRE {} due to format exception: {}. Falling back to raw data.", tag, e.getMessage());
+            LOG.debug("TRE parsing format exception details:", e);
+        } catch (UnsupportedOperationException e) {
+            // Parsing hit unimplemented feature - fall back to raw data
+            tre.setRawData(treBytes);
+            LOG.warn("Failed to parse TRE {} due to unimplemented feature: {}. Falling back to raw data.", tag, e.getMessage());
+            LOG.debug("TRE parsing unsupported operation details:", e);
+        } catch (RuntimeException e) {
+            // Catch other runtime exceptions (e.g., NPE, IndexOutOfBounds) but not Error
+            tre.setRawData(treBytes);
+            LOG.warn("Failed to parse TRE {} due to unexpected error: {}. Falling back to raw data.", tag, e.getMessage());
+            LOG.debug("TRE parsing runtime exception details:", e);
         }
 
         return tre;
@@ -282,12 +312,8 @@ public class TreParser {
     }
 
     private TreType getTreTypeForTag(final String tag) {
-        for (TreType treType : tresStructure.getTre()) {
-            if (treType.getName().equals(tag.trim())) {
-                return treType;
-            }
-        }
-        return null;
+        // Use HashMap cache for O(1) lookup instead of O(n) linear search
+        return treTypeCache.get(tag.trim());
     }
 
     private TreEntry parseLoop(final LoopType loopType, final NitfReader reader, final TreParams params) throws NitfFormatException {

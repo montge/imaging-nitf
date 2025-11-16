@@ -104,6 +104,21 @@ final class CoordinateConstants {
      */
     public static final int LAT_DECIMAL_DEGREES_FORMAT_LENGTH = LAT_DECIMAL_DEGREES_FORMAT.length();
 
+    /**
+     * The expected length for UTM coordinate strings (e.g., "zzeeeeeennnnnnn").
+     */
+    public static final int UTM_COORDINATE_LENGTH = 16;
+
+    /**
+     * The expected length for UPS coordinate strings (e.g., "Peeeeeeennnnnnn").
+     */
+    public static final int UPS_COORDINATE_LENGTH = 16;
+
+    /**
+     * The expected length for decimal degrees coordinate strings (e.g., "+dd.ddd+ddd.ddd").
+     */
+    public static final int DECIMAL_DEGREES_COORDINATE_LENGTH = 16;
+
     private CoordinateConstants() {
     }
 }

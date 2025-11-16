@@ -14,6 +14,7 @@
  */
 package org.codice.imaging.nitf.core.image.impl;
 
+import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.DECIMAL_DEGREES_COORDINATE_LENGTH;
 import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.HEMISPHERE_MARKER_LENGTH;
 import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.LAT_DECIMAL_DEGREES_FORMAT_LENGTH;
 import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.LAT_DEGREES_LENGTH;
@@ -30,6 +31,8 @@ import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.MINUTE
 import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.MINUTES_LENGTH;
 import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.SECONDS_IN_ONE_MINUTE;
 import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.SECONDS_LENGTH;
+import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.UPS_COORDINATE_LENGTH;
+import static org.codice.imaging.nitf.core.image.impl.CoordinateConstants.UTM_COORDINATE_LENGTH;
 
 import org.codice.imaging.nitf.core.common.NitfFormatException;
 import org.codice.imaging.nitf.core.image.ImageCoordinatePair;
@@ -161,17 +164,7 @@ public class ImageCoordinatePairImpl implements ImageCoordinatePair {
         @throws NitfFormatException if the string does not have the correct length / format.
     */
     public final void setFromUTMNorth(final String utm) throws NitfFormatException {
-        if (utm.length() != "zzeeeeeennnnnnn".length()) {
-            throw new NitfFormatException("Incorrect length for UTM North string");
-        }
-        sourceString = utm;
-
-        DecimalDegreesCoordinate latLonCoordinate = CoordinateUtility.buildCoordinateFromUtm(this.sourceString);
-
-        if (latLonCoordinate != null) {
-            this.lat = latLonCoordinate.getLat();
-            this.lon = latLonCoordinate.getLon();
-        }
+        setFromUTM(utm, false);
     }
 
     /**
@@ -184,8 +177,20 @@ public class ImageCoordinatePairImpl implements ImageCoordinatePair {
      * @throws NitfFormatException if the string does not have the correct length / format.
     */
     public final void setFromUTMSouth(final String utm) throws NitfFormatException {
-        if (utm.length() != "zzeeeeeennnnnnn".length()) {
-            throw new NitfFormatException("Incorrect length for UTM South string");
+        setFromUTM(utm, true);
+    }
+
+    /**
+     * Common UTM parsing logic for both North and South hemispheres.
+     *
+     * @param utm the string representation of the UTM coordinates.
+     * @param isSouth true if southern hemisphere (negate longitude), false for northern.
+     * @throws NitfFormatException if the string does not have the correct length / format.
+     */
+    private void setFromUTM(final String utm, final boolean isSouth) throws NitfFormatException {
+        if (utm.length() != UTM_COORDINATE_LENGTH) {
+            throw new NitfFormatException("Incorrect length for UTM string: expected "
+                    + UTM_COORDINATE_LENGTH + ", got " + utm.length());
         }
         sourceString = utm;
 
@@ -193,7 +198,7 @@ public class ImageCoordinatePairImpl implements ImageCoordinatePair {
 
         if (latLonCoordinate != null) {
             this.lat = latLonCoordinate.getLat();
-            this.lon = latLonCoordinate.getLon() * -1;
+            this.lon = isSouth ? latLonCoordinate.getLon() * -1 : latLonCoordinate.getLon();
         }
     }
 
@@ -207,8 +212,9 @@ public class ImageCoordinatePairImpl implements ImageCoordinatePair {
      * @throws NitfFormatException if the string does not have the correct length / format.
     */
     public final void setFromUPS(final String ups) throws NitfFormatException {
-        if (ups.length() != "Peeeeeeennnnnnn".length()) {
-            throw new NitfFormatException("Incorrect length for UPS string");
+        if (ups.length() != UPS_COORDINATE_LENGTH) {
+            throw new NitfFormatException("Incorrect length for UPS string: expected "
+                    + UPS_COORDINATE_LENGTH + ", got " + ups.length());
         }
         sourceString = ups;
     }
@@ -220,8 +226,9 @@ public class ImageCoordinatePairImpl implements ImageCoordinatePair {
         @throws NitfFormatException if the format is not as expected.
      */
     public final void setFromDecimalDegrees(final String dd) throws NitfFormatException {
-        if (dd.length() != "+dd.ddd+ddd.ddd".length()) {
-            throw new NitfFormatException("Incorrect length for decimal degrees parsing");
+        if (dd.length() != DECIMAL_DEGREES_COORDINATE_LENGTH) {
+            throw new NitfFormatException("Incorrect length for decimal degrees parsing: expected "
+                    + DECIMAL_DEGREES_COORDINATE_LENGTH + ", got " + dd.length());
         }
         sourceString = dd;
         String latPart = dd.substring(0, LAT_DECIMAL_DEGREES_FORMAT_LENGTH);
