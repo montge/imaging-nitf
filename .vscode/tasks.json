@@ -1,0 +1,71 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Maven: Clean Install",
+      "type": "shell",
+      "command": "./mvnw clean install",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: Quick Build",
+      "type": "shell",
+      "command": "./mvnw clean install -Pquick",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: Test",
+      "type": "shell",
+      "command": "./mvnw test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: Verify with Quality",
+      "type": "shell",
+      "command": "./mvnw verify -Pquality",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: Security Scan",
+      "type": "shell",
+      "command": "./mvnw verify -Psecurity",
+      "group": "none",
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: Mutation Testing",
+      "type": "shell",
+      "command": "./mvnw verify -Pmutation",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: Coverage Report",
+      "type": "shell",
+      "command": "./mvnw test jacoco:report",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "Checkstyle: Check",
+      "type": "shell",
+      "command": "./mvnw checkstyle:check",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "SpotBugs: Check",
+      "type": "shell",
+      "command": "./mvnw spotbugs:check",
+      "group": "test",
+      "problemMatcher": []
+    }
+  ]
+}
