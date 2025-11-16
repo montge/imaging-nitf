@@ -8,25 +8,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- SECURITY.md with vulnerability reporting process
-- CONTRIBUTING.md with comprehensive contributor guidelines
-- CodeQL security scanning workflow
-- JaCoCo coverage reporting in CI/CD pipeline
-- Maven package caching in GitHub Actions
-- Codecov integration for coverage tracking
-- Updated README badges (GitHub Actions, CodeQL, License)
+- **Documentation:**
+  - SECURITY.md with vulnerability reporting process
+  - CONTRIBUTING.md with comprehensive contributor guidelines
+  - CODE_OF_CONDUCT.md (Contributor Covenant 2.1)
+  - CHANGELOG.md following Keep a Changelog format
+  - Updated README badges (GitHub Actions, CodeQL, License)
+
+- **Security & Quality:**
+  - CodeQL security scanning workflow (runs on commits and weekly)
+  - OWASP Dependency-Check plugin with vulnerability scanning
+  - OWASP Dependency-Check GitHub workflow (weekly + on PRs)
+  - Pre-commit hooks configuration (.pre-commit-config.yaml)
+  - Detect-secrets integration for credential scanning
+
+- **CI/CD:**
+  - JaCoCo coverage reporting in CI/CD pipeline
+  - Codecov integration for coverage tracking
+  - Multi-JDK matrix build (JDK 11, 17, 21)
+  - Multi-OS testing (Ubuntu, Windows, macOS)
+  - Maven package caching in GitHub Actions
+  - Test result reporting and artifact uploads
 
 ### Changed
-- Fixed Dependabot configuration to properly track Maven dependencies
-- Updated GitHub Actions to use latest versions (v4)
-- Enhanced CI/CD to run on both push and pull_request events
-- Updated README to reflect current version (0.11-SNAPSHOT)
-- Removed outdated Travis CI badge
+- **Dependency Updates (Major):**
+  - Mockito: 1.10.8 → 5.14.2 (10 years of updates!)
+  - JaCoCo: 0.8.4 → 0.8.12
+  - SLF4J: 1.7.30 → 2.0.16
+  - Hamcrest: 2.2 → 3.0
+  - SpotBugs: 4.4.2 → 4.8.6
+  - Checkstyle plugin: 2.17 → 3.5.0
+  - Maven Compiler plugin: 3.8.1 → 3.13.0
+  - Maven Javadoc plugin: 2.9.1 → 3.10.1
+  - Commons IO: 2.11.0 → 2.17.0
+  - Glassfish JAXB: 4.0.2 → 4.0.5
+  - Jakarta XML Bind: 4.0.0 → 4.0.2
+
+- **CI/CD Improvements:**
+  - Fixed Dependabot configuration to properly track Maven dependencies
+  - Updated GitHub Actions to use latest versions (v4)
+  - Enhanced CI/CD to run on both push and pull_request events
+  - Updated README to reflect current version (0.11-SNAPSHOT)
+  - Removed outdated Travis CI badge
+  - Maven version updated to 3.9.9 in multi-JDK workflow
 
 ### Security
-- Enabled automated dependency vulnerability scanning
+- Enabled automated dependency vulnerability scanning with OWASP
 - Added weekly Dependabot updates for Maven dependencies
 - Configured CodeQL for security analysis on all commits
+- CVSS threshold of 7+ configured to fail builds
+- Automated secret detection in commits
 
 ## [0.10] - 2021-10-15
 

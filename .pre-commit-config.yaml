@@ -1,0 +1,104 @@
+# Pre-commit hooks for imaging-nitf
+# Install: pip install pre-commit
+# Setup: pre-commit install
+# Run manually: pre-commit run --all-files
+
+repos:
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom tags in GitHub Actions
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-xml
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+      - id: detect-private-key
+
+  # Java formatting and linting
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.14.0
+    hooks:
+      - id: pretty-format-java
+        args:
+          - --autofix
+          - --aosp  # Android Open Source Project style (4 spaces)
+
+  # Maven checks
+  - repo: local
+    hooks:
+      - id: maven-checkstyle
+        name: Maven Checkstyle
+        entry: mvn checkstyle:check -q
+        language: system
+        pass_filenames: false
+        files: \.java$
+        stages: [commit]
+
+      - id: maven-spotbugs
+        name: Maven SpotBugs
+        entry: mvn spotbugs:check -q
+        language: system
+        pass_filenames: false
+        files: \.java$
+        stages: [commit]
+
+      - id: maven-compile
+        name: Maven Compile
+        entry: mvn clean compile -q -DskipTests
+        language: system
+        pass_filenames: false
+        files: \.(java|xml)$
+        stages: [commit]
+
+      - id: maven-test
+        name: Maven Test (Fast)
+        entry: mvn test -q -Dtest=*Test
+        language: system
+        pass_filenames: false
+        files: \.java$
+        stages: [push]
+
+  # Security checks
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package-lock.json
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.42.0
+    hooks:
+      - id: markdownlint
+        args: ['--fix']
+
+# Configuration for specific hooks
+default_language_version:
+  python: python3
+
+# Exclude generated files and test resources
+exclude: |
+  (?x)^(
+    target/.*|
+    .*\.class|
+    .*\.jar|
+    .*\.war|
+    .*/generated-sources/.*|
+    .*/test/resources/.*\.ntf|
+    .*/test/resources/.*\.nitf
+  )$
+
+# Fail fast - stop on first failure
+fail_fast: false
+
+# Minimum pre-commit version required
+minimum_pre_commit_version: '2.20.0'
