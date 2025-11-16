@@ -170,6 +170,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     * Edge cases: 95%+ coverage
     * Format compliance: 100% coverage
 
+- **Project Management & Planning:**
+  - EOL_DEPENDENCY_ANALYSIS.md - Comprehensive EOL dependency analysis
+    * Reviewed all dependencies, compilers, and build tools
+    * Overall status: A- (excellent shape)
+    * Java 11 LTS supported until 2026 (6 years remaining)
+    * All build tools and plugins current
+    * Only JUnit 4 is EOL (but still maintained for security)
+    * Quarterly monitoring plan established
+  - GITHUB_ISSUES_TO_CREATE.md - Complete issue tracking plan
+    * 14 completed issues documented
+    * 6 future issues planned
+    * Detailed descriptions with labels and milestones
+    * Reference commits and related work
+    * Estimated effort for future work (54-92 hours total)
+
 ### Changed
 - **Dependency Updates (Major):**
   - Mockito: 1.10.8 → 5.14.2 (10 years of updates!)
