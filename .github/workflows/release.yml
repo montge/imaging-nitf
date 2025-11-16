@@ -1,0 +1,142 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 0.11.0)'
+        required: true
+        type: string
+      next-version:
+        description: 'Next development version (e.g., 0.12-SNAPSHOT)'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Verify version format
+        run: |
+          if [[ ! "${{ inputs.version }}" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Version must be in format X.Y.Z (e.g., 0.11.0)"
+            exit 1
+          fi
+          if [[ ! "${{ inputs.next-version }}" =~ ^[0-9]+\.[0-9]+-SNAPSHOT$ ]]; then
+            echo "Error: Next version must be in format X.Y-SNAPSHOT (e.g., 0.12-SNAPSHOT)"
+            exit 1
+          fi
+
+      - name: Update version in POM
+        run: |
+          ./mvnw versions:set -DnewVersion=${{ inputs.version }} -DgenerateBackupPoms=false
+          git add pom.xml */pom.xml
+          git commit -m "Release version ${{ inputs.version }}"
+
+      - name: Run full build with all checks
+        run: ./mvnw clean install -Prelease,quality
+
+      - name: Run security scan
+        run: ./mvnw verify -Psecurity
+        continue-on-error: true
+
+      - name: Create Git tag
+        run: |
+          git tag -a "v${{ inputs.version }}" -m "Release version ${{ inputs.version }}"
+
+      - name: Generate changelog for release
+        id: changelog
+        run: |
+          # Extract changelog for this version
+          sed -n '/## \[Unreleased\]/,/## \[/p' CHANGELOG.md | head -n -1 > RELEASE_NOTES.md
+          echo "Generated release notes"
+
+      - name: Build distribution artifacts
+        run: |
+          ./mvnw package -DskipTests
+          mkdir -p dist
+          find . -name "*.jar" -not -path "*/target/test-*" -not -path "*/test-classes/*" \
+            -exec cp {} dist/ \;
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ inputs.version }}
+          name: Release ${{ inputs.version }}
+          body_path: RELEASE_NOTES.md
+          draft: false
+          prerelease: false
+          files: |
+            dist/*.jar
+            CHANGELOG.md
+            README.md
+            LICENSE.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update to next development version
+        run: |
+          ./mvnw versions:set -DnewVersion=${{ inputs.next-version }} -DgenerateBackupPoms=false
+          git add pom.xml */pom.xml
+          git commit -m "Prepare for next development iteration: ${{ inputs.next-version }}"
+
+      - name: Update CHANGELOG for next version
+        run: |
+          # Add new Unreleased section
+          sed -i '/## \[Unreleased\]/a\\n## [${{ inputs.version }}] - $(date +%Y-%m-%d)\n' CHANGELOG.md
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG for ${{ inputs.version }} release" || true
+
+      - name: Push changes and tags
+        run: |
+          git push origin main
+          git push origin v${{ inputs.version }}
+
+      - name: Publish to Maven Central (if configured)
+        if: env.MAVEN_CENTRAL_ENABLED == 'true'
+        run: |
+          ./mvnw deploy -Prelease -DskipTests
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
+          MAVEN_CENTRAL_ENABLED: ${{ secrets.MAVEN_CENTRAL_ENABLED }}
+
+      - name: Create release summary
+        run: |
+          echo "## Release Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ **Version ${{ inputs.version }} released successfully!**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### What happened:" >> $GITHUB_STEP_SUMMARY
+          echo "- Updated version to ${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Created Git tag v${{ inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Published GitHub release with artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- Updated version to ${{ inputs.next-version }} for next development cycle" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Links:" >> $GITHUB_STEP_SUMMARY
+          echo "- [Release Page](https://github.com/${{ github.repository }}/releases/tag/v${{ inputs.version }})" >> $GITHUB_STEP_SUMMARY
+          echo "- [All Releases](https://github.com/${{ github.repository }}/releases)" >> $GITHUB_STEP_SUMMARY
