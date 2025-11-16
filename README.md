@@ -1,7 +1,9 @@
 imaging-nitf
 ============
-[![Build Status](https://travis-ci.org/codice/imaging-nitf.svg?branch=master)](https://travis-ci.org/codice/imaging-nitf)
-[![CLA assistant](https://cla-assistant.io/readme/badge/codice/imaging-nitf)](https://cla-assistant.io/codice/imaging-nitf) 
+[![Build Status](https://github.com/codice/imaging-nitf/workflows/Linux%20JDK%2011%20GitHub%20CI/badge.svg)](https://github.com/codice/imaging-nitf/actions)
+[![CodeQL](https://github.com/codice/imaging-nitf/workflows/CodeQL%20Security%20Scanning/badge.svg)](https://github.com/codice/imaging-nitf/security/code-scanning)
+[![CLA assistant](https://cla-assistant.io/readme/badge/codice/imaging-nitf)](https://cla-assistant.io/codice/imaging-nitf)
+[![License](https://img.shields.io/badge/License-LGPL%202.1-blue.svg)](LICENSE.md)
 
 Pure Java National Imagery Transmission Format (NITF) file support.
 
@@ -30,13 +32,13 @@ This will compile imaging-nitf and run all of the tests.
   <dependency>
     <groupId>org.codice.imaging.nitf</groupId>
     <artifactId>codice-imaging-nitf-core</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.11-SNAPSHOT</version>
   </dependency>
-  
+
   <dependency>
     <groupId>org.codice.imaging.nitf</groupId>
     <artifactId>codice-imaging-cgm</artifactId>
-    <version>0.9-SNAPSHOT</version>
+    <version>0.11-SNAPSHOT</version>
   </dependency>
 ```
 

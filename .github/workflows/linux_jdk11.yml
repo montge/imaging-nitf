@@ -1,6 +1,10 @@
 name: Linux JDK 11 GitHub CI
 
-on: [pull_request]
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
 
 env:
   MAVEN_OPTS: -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS
@@ -14,17 +18,40 @@ jobs:
           - os: ubuntu-20.04
             jdk: 11
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         # 500 commits, set to 0 to get all
         fetch-depth: 500
+
     - name: Set up JDK
-      uses: actions/setup-java@v1
+      uses: actions/setup-java@v4
       with:
         java-version: ${{ matrix.jdk }}
+        distribution: 'temurin'
+
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
     - name: Set up Maven
       uses: stCarolas/setup-maven@v4
       with:
         maven-version: 3.6.3
+
     - name: Build with Maven
       run: mvn -B -U -T3 -fae -Dfmt.skip=true -Prelease clean install
+
+    - name: Generate JaCoCo Coverage Report
+      run: mvn jacoco:report-aggregate
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        files: ./target/site/jacoco-aggregate/jacoco.xml
+        flags: unittests
+        name: codecov-imaging-nitf
+        fail_ci_if_error: false
