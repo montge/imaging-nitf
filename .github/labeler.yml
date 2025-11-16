@@ -1,0 +1,65 @@
+# Automated PR labeling based on changed files
+
+# Documentation
+documentation:
+  - '*.md'
+  - 'docs/**/*'
+  - '.github/ISSUE_TEMPLATE/*'
+  - '.github/PULL_REQUEST_TEMPLATE.md'
+
+# CI/CD
+ci/cd:
+  - '.github/workflows/*'
+  - '.github/dependabot.yml'
+
+# Dependencies
+dependencies:
+  - 'pom.xml'
+  - '**/pom.xml'
+  - '.mvn/**/*'
+
+# Core modules
+core:
+  - 'core/**/*'
+  - 'core-api/**/*'
+
+# Rendering
+render:
+  - 'render/**/*'
+
+# CGM
+cgm:
+  - 'cgm/**/*'
+
+# Fluent API
+fluent:
+  - 'fluent/**/*'
+  - 'fluent-api/**/*'
+
+# Tests
+tests:
+  - '**/src/test/**/*'
+  - 'shared-test-resources/**/*'
+
+# Security
+security:
+  - 'SECURITY.md'
+  - '.github/workflows/codeql.yml'
+  - '.github/workflows/owasp-dependency-check.yml'
+
+# Build tooling
+build:
+  - 'pom.xml'
+  - 'mvnw'
+  - 'mvnw.cmd'
+  - '.mvn/**/*'
+  - 'checkstyle.xml'
+  - '**/checkstyle-suppressions.xml'
+  - '**/SpotBugsFilter.xml'
+
+# Configuration
+configuration:
+  - '.editorconfig'
+  - '.gitignore'
+  - '.pre-commit-config.yaml'
+  - '.vscode/**/*'
