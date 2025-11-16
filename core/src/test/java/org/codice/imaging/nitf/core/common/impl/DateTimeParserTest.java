@@ -146,4 +146,157 @@ public class DateTimeParserTest {
         assertNull(parser.readNitfDateTime(mockReader).getZonedDateTime());
         assertEquals("              ", parser.readNitfDateTime(mockReader).getSourceString());
     }
+
+    // ========== Edge Case Tests ==========
+
+    @Test
+    public void testFullDateTimeParsing() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20230915143025");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2023, 9, 15, 14, 30, 25, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testNewYearsDay() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20250101000000");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2025, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testNewYearsEve() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20241231235959");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2024, 12, 31, 23, 59, 59, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testLeapYearFebruary29() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20240229120000");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2024, 2, 29, 12, 0, 0, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testMidnightTransition() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20230630235959");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2023, 6, 30, 23, 59, 59, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testMorningMidnight() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20230701000000");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2023, 7, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testY2KDate() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20000101000000");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2000, 1, 1, 0, 0, 0, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testMixedPaddingDate() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20140704231530");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2014, 7, 4, 23, 15, 30, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testPartialTimeWithDashes() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("201407042315--");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2014, 7, 4, 23, 15, 0, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testDecemberDate() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20231215120000");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2023, 12, 15, 12, 0, 0, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testJanuaryDate() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20230105060708");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2023, 1, 5, 6, 7, 8, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testEarlyMorningHour() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20230715010203");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2023, 7, 15, 1, 2, 3, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testNoonTime() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("20230715120000");
+        ZonedDateTime expectedDate = ZonedDateTime.of(2023, 7, 15, 12, 0, 0, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testNitf20FullDateTime() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ZERO);
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn("19991231235959");
+        ZonedDateTime expectedDate = ZonedDateTime.of(1999, 12, 31, 23, 59, 59, 0, ZoneId.of("UTC"));
+        DateTimeParser parser = new DateTimeParser();
+        assertEquals(expectedDate, parser.readNitfDateTime(mockReader).getZonedDateTime());
+    }
+
+    @Test
+    public void testSourceStringPreservation() throws NitfFormatException {
+        NitfReader mockReader = mock(NitfReader.class);
+        when(mockReader.getFileType()).thenReturn(FileType.NITF_TWO_ONE);
+        String testDateString = "20230915143025";
+        when(mockReader.readBytes(CommonConstants.STANDARD_DATE_TIME_LENGTH)).thenReturn(testDateString);
+        DateTimeParser parser = new DateTimeParser();
+        DateTime result = parser.readNitfDateTime(mockReader);
+        assertEquals(testDateString, result.getSourceString());
+    }
 }
