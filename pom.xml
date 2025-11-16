@@ -30,6 +30,9 @@
         <jaxb.api.version>2.3.1</jaxb.api.version>
         <commons-io.version>2.17.0</commons-io.version>
         <owasp.dependency-check.version>10.0.4</owasp.dependency-check.version>
+        <pitest.version>1.17.1</pitest.version>
+        <pitest-junit5.version>1.2.1</pitest-junit5.version>
+        <archunit.version>1.3.0</archunit.version>
     </properties>
 
     <modules>
@@ -94,6 +97,34 @@
                             </goals>
                         </execution>
                     </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.pitest</groupId>
+                    <artifactId>pitest-maven</artifactId>
+                    <version>${pitest.version}</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.pitest</groupId>
+                            <artifactId>pitest-junit5-plugin</artifactId>
+                            <version>${pitest-junit5.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <targetClasses>
+                            <param>org.codice.imaging.nitf.*</param>
+                        </targetClasses>
+                        <targetTests>
+                            <param>org.codice.imaging.nitf.*</param>
+                        </targetTests>
+                        <outputFormats>
+                            <outputFormat>XML</outputFormat>
+                            <outputFormat>HTML</outputFormat>
+                        </outputFormats>
+                        <mutationThreshold>60</mutationThreshold>
+                        <coverageThreshold>70</coverageThreshold>
+                        <timestampedReports>false</timestampedReports>
+                        <verbose>false</verbose>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -29,6 +29,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Multi-OS testing (Ubuntu, Windows, macOS)
   - Maven package caching in GitHub Actions
   - Test result reporting and artifact uploads
+  - GitHub Pages workflow for Javadoc deployment
+
+- **Testing Infrastructure:**
+  - Maven Wrapper (mvnw) for reproducible builds
+  - PIT mutation testing plugin (60% mutation threshold)
+  - ArchUnit for architecture testing
+  - Example architecture test for package structure and design rules
+
+- **Project Templates:**
+  - Pull request template with comprehensive checklist
+  - Bug report issue template (YAML form)
+  - Feature request issue template (YAML form)
+  - Issue template configuration
 
 ### Changed
 - **Dependency Updates (Major):**

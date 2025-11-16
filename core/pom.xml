@@ -104,6 +104,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.tngtech.archunit</groupId>
+            <artifactId>archunit-junit4</artifactId>
+            <version>${archunit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.codice.usng4j</groupId>
             <artifactId>usng4j-api</artifactId>
             <version>${usng4j.version}</version>

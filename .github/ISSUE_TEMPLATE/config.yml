@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions & Discussions
+    url: https://github.com/codice/imaging-nitf/discussions
+    about: Ask questions and discuss with the community
+  - name: Security Vulnerability
+    url: https://github.com/codice/imaging-nitf/security/advisories/new
+    about: Report a security vulnerability privately
+  - name: Documentation
+    url: https://codice.github.io/imaging-nitf/
+    about: View the project documentation and API reference
